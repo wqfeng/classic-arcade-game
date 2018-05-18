@@ -63,7 +63,9 @@ var Engine = (function(global) {
      * game loop.
      */
     function init() {
-        reset();
+        if (entities[3]) {
+			reset();
+		}
         lastTime = Date.now();
         main();
     }
@@ -71,7 +73,26 @@ var Engine = (function(global) {
 	
 	/* This function checks for trigger collisions between objects*/
 	function checkCollisions() {
-		// noop
+		let player = entities.filter(entity => entity instanceof Player)[0];
+		let pCollider = player.getCollider();
+		let enemies = entities.filter(entity => entity instanceof Enemy);
+		enemies.forEach(enemy=> {
+			let eCollider = enemy.getCollider();
+			if (collides(eCollider, pCollider)) {
+				init();	
+			}
+		})
+		let goal = entities.filter(entity => entity instanceof Goal)[0];
+		if (collides(pCollider, goal.getCollider())) {
+				init();
+		}
+	}
+
+	function collides(first, second) {
+		return (first[0] < second[0] + second[2] &&
+			second[0] < first[0] + first[2] &&
+			first[1] < second[1] + second[3] &&
+			second[1] < first[1] + first[3]) 
 	}
 
     /* This function is called by main (our game loop) and itself calls all
@@ -85,7 +106,7 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        checkCollisions();
+		checkCollisions();
     }
 
     /* This is called by the update function and loops through all of the
@@ -161,8 +182,8 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
-    }
+    	entities[3].reset();
+	}
 
     /* Go ahead and load all of the images we know we're going to need to
      * draw our game level. Then set init as the callback method, so that when

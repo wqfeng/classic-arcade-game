@@ -6,6 +6,27 @@ const PLAYER_SPEED = 250;
 const PLAYER_SPRITE = 'images/char-boy.png';
 const BOUNDARY = {minX: 0, maxX: 405, minY: -30, maxY: 385}
 
+class Goal {
+	constructor() {
+		this.minX = 0;
+		this.minY = 0;
+		this.maxX = 465;
+		this.maxY = 110;
+	}
+
+	update() {
+		//noop
+	}
+
+	render() {
+		//noop
+	}
+
+	getCollider() {
+		return[this.minX, this.minY, this.maxX-this.minX, this.maxY-this.minY] 
+	}
+
+}
 
 class Movable {
 	constructor() {
@@ -15,7 +36,9 @@ class Movable {
 	}
 
 	render() {
-		ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+		if (this.sprite != "") {
+			ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+		}
 	}
 
 	update() {
@@ -31,12 +54,22 @@ class Enemy extends Movable {
 		this.x = x;
 		this.y = y;
 		this.speed = speed;
-		this.collider = [10,10]
+	}
 	
+	render() {
+		super.render();
+	}
+
+
+	getCollider() {
+		return [this.x + 8, this.y + 80, 86, 60]; 
 	}
 
 	update(dt) {
-	    this.x += speed * dt;
+	    this.x += this.speed * dt;
+		if (this.x > 550) {
+			this.x = -50;
+		}
 	}
 }
 
@@ -46,14 +79,29 @@ class Player extends Movable {
 		this.sprite = PLAYER_SPRITE;
 		this.x = x;
 		this.y = y;
+		this.startX = x;
+		this.startY = y;
+		
 		this.speed = speed;
-		this.collider = [10,10];
 		this.input = {
 			'vertical': 0,
 			'horizontal': 0
 		};
 	}
 	
+	render() {
+		super.render();
+	}
+    
+	reset() {
+		this.x = this.startX;
+		this.y = this.startY;
+	}
+
+    getCollider() {
+		return [this.x + 35, this.y + 120, 33, 20]
+	}
+
 	update(dt) {
 		this.x += this.input['horizontal'] * this.speed * dt;
 		this.y += this.input['vertical'] * this.speed * dt;
@@ -100,7 +148,6 @@ class Player extends Movable {
 		if (key == "down") {
 			this.input['vertical'] = 0
 		}
-
 	}
 }
 
@@ -110,9 +157,15 @@ class Player extends Movable {
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 
-const player = new Player(PLAYER_ORIGIN.x, PLAYER_ORIGIN.y, PLAYER_SPEED)
 
-entities = [player];
+
+const player = new Player(PLAYER_ORIGIN.x, PLAYER_ORIGIN.y, PLAYER_SPEED)
+const goal = new Goal();
+const enemy_one = new Enemy(-20, 63, 100)
+const enemy_two = new Enemy(-20, 146, 150)
+const enemy_three = new Enemy(-20, 229, 75)
+
+entities = [enemy_three, enemy_two, enemy_one, player, goal];
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
